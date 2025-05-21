@@ -1,0 +1,17 @@
+name: JustTowers
+version: '1.0'
+main: dev.rokyytr.JustTowers
+api-version: '1.21'
+authors: [RokyYTR]
+description: Just a towers plugin
+commands:
+  towers:
+    description: Manage the Towers minigame
+    usage: /<command> <setup|tp>
+permissions:
+  towers.setup:
+    description: Allows setting up the Towers game
+    default: op
+  towers.tp:
+    description: Allows teleporting to the Towers game
+    default: true

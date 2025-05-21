@@ -10,8 +10,11 @@ commands:
     usage: /<command> <setup|tp>
 permissions:
   towers.setup:
-    description: Allows setting up the Towers game
+    description: Setup for Towers game
     default: op
   towers.tp:
-    description: Allows teleporting to the Towers game
+    description: Teleports you to Towers game
+    default: op
+  towers.join:
+    description: Joins you to Towers game
     default: true

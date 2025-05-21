@@ -2,7 +2,6 @@ package dev.rokyytr.generators;
 
 import dev.rokyytr.managers.GameManager;
 import org.bukkit.*;
-import org.bukkit.block.Biome;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +24,9 @@ public class WorldGenerator {
         gameWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
         gameWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         gameManager.setGameWorld(gameWorld);
-        generateTowers();
     }
 
-    private void generateTowers() {
+    public void generateTowers() {
         List<Location> towerLocations = new ArrayList<>();
         World gameWorld = gameManager.getGameWorld();
         int numberOfTowers = gameManager.getNumberOfTowers();
@@ -36,7 +34,6 @@ public class WorldGenerator {
         int height = gameManager.getTowerMinHeight();
         double radius = gameManager.getTowerRadius();
         Material towerMaterial = gameManager.getTowerMaterial();
-
         for (int i = 0; i < numberOfTowers; i++) {
             double angle = 2 * Math.PI * i / numberOfTowers;
             int x = (int) Math.round(radius * Math.cos(angle));
@@ -48,26 +45,5 @@ public class WorldGenerator {
         }
         gameManager.getTowerLocations().clear();
         gameManager.getTowerLocations().addAll(towerLocations);
-    }
-
-    public void setWorldBiome() {
-        World gameWorld = gameManager.getGameWorld();
-        Biome biome;
-        switch (gameManager.getSelectedBiome()) {
-            case "nether":
-                biome = Biome.NETHER_WASTES;
-                break;
-            case "end":
-                biome = Biome.THE_END;
-                break;
-            default:
-                biome = Biome.PLAINS;
-        }
-        int radius = (int) gameManager.getTowerRadius() + 10;
-        for (int x = -radius; x <= radius; x++) {
-            for (int z = -radius; z <= radius; z++) {
-                gameWorld.setBiome(x, 0, z, biome);
-            }
-        }
     }
 }

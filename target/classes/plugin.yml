@@ -1,5 +1,5 @@
 name: JustTowers
-version: '1.0'
+version: '1.0.0'
 main: dev.rokyytr.JustTowers
 api-version: '1.21'
 authors: [RokyYTR]

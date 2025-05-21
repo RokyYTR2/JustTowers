@@ -32,29 +32,19 @@ public class WorldGenerator {
         List<Location> towerLocations = new ArrayList<>();
         World gameWorld = gameManager.getGameWorld();
         int numberOfTowers = gameManager.getNumberOfTowers();
-        int towerSpacing = gameManager.getTowerSpacing();
         int bottomY = gameManager.getTowerBottomY();
-        int minHeight = gameManager.getTowerMinHeight();
-        int maxHeight = gameManager.getTowerMaxHeight();
+        int height = gameManager.getTowerMinHeight();
         double radius = gameManager.getTowerRadius();
         Material towerMaterial = gameManager.getTowerMaterial();
 
         for (int i = 0; i < numberOfTowers; i++) {
-            double angle = -Math.PI / 2 + (i / (double)(numberOfTowers - 1)) * Math.PI;
-            int x = (int) (radius * Math.cos(angle));
-            int z = (int) (radius * Math.sin(angle));
-            double heightFactor = Math.abs(angle) / (Math.PI / 2);
-            int height = minHeight + (int)((maxHeight - minHeight) * (1 - heightFactor));
-            Location loc = new Location(gameWorld, x, bottomY, z);
-
+            double angle = 2 * Math.PI * i / numberOfTowers;
+            int x = (int) Math.round(radius * Math.cos(angle));
+            int z = (int) Math.round(radius * Math.sin(angle));
             for (int y = bottomY; y < bottomY + height; y++) {
-                for (int dx = -1; dx <= 0; dx++) {
-                    for (int dz = -1; dz <= 0; dz++) {
-                        gameWorld.getBlockAt(x + dx, y, z + dz).setType(towerMaterial);
-                    }
-                }
+                gameWorld.getBlockAt(x, y, z).setType(towerMaterial);
             }
-            towerLocations.add(new Location(gameWorld, x, bottomY + height - 1, z));
+            towerLocations.add(new Location(gameWorld, x, bottomY + height, z));
         }
         gameManager.getTowerLocations().clear();
         gameManager.getTowerLocations().addAll(towerLocations);

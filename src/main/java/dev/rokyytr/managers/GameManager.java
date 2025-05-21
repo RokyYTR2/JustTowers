@@ -37,6 +37,8 @@ public class GameManager {
     private final int towerMinHeight;
     private final int towerMaxHeight;
     private final double towerRadius;
+    private final List<Player> lobbyPlayers = new ArrayList<>();
+    private final Location lobbyLocation = new Location(Bukkit.getWorlds().get(0), 0, 100, 0);
 
     public GameManager(JustTowers plugin) {
         this.plugin = plugin;
@@ -80,6 +82,64 @@ public class GameManager {
         }
     }
 
+    public boolean isGameRunning() {
+        return gameRunning;
+    }
+
+    public boolean isInLobby(Player player) {
+        return lobbyPlayers.contains(player);
+    }
+
+    public void addPlayerToLobby(Player player) {
+        lobbyPlayers.add(player);
+        buildGlassBoxLobby();
+        Location tpLoc = lobbyLocation.clone().add(0, 1, 0);
+        player.teleport(tpLoc);
+        player.sendMessage(ChatColor.GREEN + "You joined the Towers lobby!");
+
+        if (lobbyPlayers.size() >= playerCountToStart) {
+            startCountdown();
+        } else {
+            Bukkit.broadcastMessage(ChatColor.YELLOW + "Players in lobby: " + lobbyPlayers.size() + "/" + playerCountToStart);
+        }
+    }
+
+    private void buildGlassBoxLobby() {
+        World world = lobbyLocation.getWorld();
+        int x0 = lobbyLocation.getBlockX(), y0 = lobbyLocation.getBlockY(), z0 = lobbyLocation.getBlockZ();
+        for (int x = -1; x <= 1; x++) {
+            for (int y = 0; y <= 2; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    boolean wall = x == -1 || x == 1 || y == 0 || y == 2 || z == -1 || z == 1;
+                    assert world != null;
+                    world.getBlockAt(x0 + x, y0 + y, z0 + z).setType(wall ? Material.GLASS : Material.AIR);
+                }
+            }
+        }
+    }
+
+    private void startCountdown() {
+        gameRunning = true;
+        new BukkitRunnable() {
+            int countdown = 5;
+            @Override
+            public void run() {
+                if (countdown > 0) {
+                    for (Player p : lobbyPlayers) {
+                        p.sendTitle(ChatColor.GOLD + "" + countdown, "", 0, 20, 0);
+                    }
+                    countdown--;
+                } else {
+                    for (Player p : lobbyPlayers) {
+                        p.sendTitle(ChatColor.RED + "Fight!", "", 0, 40, 0);
+                    }
+                    startGame();
+                    cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 0, 20L);
+    }
+
     public void handleVote(Player player, String vote) {
         if (vote.contains("Rising Lava")) selectedMode = "lava";
         else if (vote.contains("Rising Water")) selectedMode = "water";
@@ -105,6 +165,8 @@ public class GameManager {
         if (gameRunning) return;
         gameRunning = true;
         worldGenerator.setWorldBiome();
+        setupGame((Player) lobbyPlayers);
+        lobbyPlayers.clear();
         new BukkitRunnable() {
             double yLevel = 0;
             @Override

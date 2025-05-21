@@ -15,3 +15,6 @@ permissions:
   towers.tp:
     description: Allows teleporting to the Towers game
     default: true
+  towers.join:
+    description: Allows to join the Towers game
+    default: true

@@ -34,6 +34,22 @@ public class TowersCommand implements CommandExecutor {
             gameManager.setupGame(player);
             return true;
         }
+        if (args[0].equalsIgnoreCase("join")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(ChatColor.RED + "This command is for players only!");
+                return true;
+            }
+            if (gameManager.isGameRunning()) {
+                player.sendMessage(ChatColor.RED + "Game already running!");
+                return true;
+            }
+            if (gameManager.isInLobby(player)) {
+                player.sendMessage(ChatColor.YELLOW + "You are already in the lobby!");
+                return true;
+            }
+            gameManager.addPlayerToLobby(player);
+            return true;
+        }
         if (args[0].equalsIgnoreCase("tp")) {
             if (!player.hasPermission("towers.tp")) {
                 player.sendMessage(ChatColor.RED + "No permission!");

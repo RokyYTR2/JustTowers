@@ -4,11 +4,12 @@
 - Just a towers plugin like pillars of fortune
 
 📦 **Installation:**
-1. Download the **.jar** file.
-2. Place it in your server's **plugins** folder.
-3. Configure settings in **config.yml**.
-4. Use **/towers setup** to generate the world.
-5. Use **/towers join** to start playing!
+1. Go to Coming Soon
+2. Download the **.jar** file.
+3. Place it in your server's **plugins** folder.
+4. Configure settings in **config.yml**.
+5. Use **/towers setup** to generate the world.
+6. Use **/towers join** to start playing!
 
 🔑 **Key Features:**
 - **Dynamic Gameplay:** Choose from rising lava, water or a normal void, or a shrinking border mode.

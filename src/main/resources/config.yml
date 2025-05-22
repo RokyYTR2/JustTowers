@@ -1,26 +1,50 @@
+#      ██╗  ████████╗
+#      ██║  ╚══██╔══╝
+#      ██║     ██║
+# ██   ██║     ██║
+# ╚█████╔╝     ██║
+#  ╚════╝      ╚═╝
 # Configuration file for the JustTowers plugin
+# Supports RGB color codes (e.g., &b for light blue, &c for red) and MiniMessage format for advanced formatting
 
-prefix: "&b&l[Towers] " # Prefix for all plugin messages, supports RGB with & color codes
+# General plugin settings
+general:
+  prefix: "&b&l[Towers] " # Prefix for all plugin messages (supports & color codes or MiniMessage)
+  language: "en_US" # Language file to use (e.g., en_US, cs_CZ, custom file in plugins/JustTowers/languages/)
 
+# Tower generation settings
 towers:
-  number: 8 # Number of towers to generate in the world
-  radius: 16.0 # Base radius of the tower circle
-  gap: 5.0 # Additional gap between towers (in blocks)
-  bottom_y: 64 # Starting Y level of the towers
-  min_height: 20 # Minimum height of each tower in blocks
-  max_height: 20 # Maximum height of each tower in blocks
-  material: BEDROCK # Material used to generate the towers (e.g., BEDROCK, STONE, OBSIDIAN)
+  number: 8 # Number of towers to generate (1-32 recommended, min: 1, max: 64)
+  radius: 16.0 # Base radius of the tower circle (min: 8.0, max: 100.0)
+  gap: 5.0 # Additional gap between towers (min: 2.0, max: 20.0)
+  bottom_y: 64 # Starting Y level for towers (min: -64, max: 320, default: 64 for overworld)
+  height:
+    min: 20 # Minimum height of each tower (min: 5, max: 100)
+    max: 20 # Maximum height of each tower (min: min_height, max: 100)
+  materials: # List of materials for tower generation (randomly selected if multiple)
+    - BEDROCK # Primary material (e.g., BEDROCK, STONE, OBSIDIAN)
 
+# Gameplay settings
 gameplay:
-  item-interval: 10 # Time interval (in seconds) for giving random items to players
-  rising-speed: 1 # Lower values mean faster rising (e.g., 1 block every 2 seconds = 0.5)
-  water-damage: 2.0 # Damage per second dealt by water if the mode is "Rising Water"
-  border-shrink-interval: 15 # Time interval (in seconds) for the border to shrink in Border mode
-  border-size: 64.0 # Initial size of the border in Border mode
-  player-count-to-start: 2 # Minimum number of players to start the game
+  item:
+    interval: 10 # Time interval for giving random items to players (min: 1, max: 300)
+  rising:
+    speed: 1.0 # Blocks per second the rising mechanic moves (0.1 = fast, 2.0 = slow, min: 0.1)
+    damage: 2.0 # Damage per second from rising mechanic (e.g., water/lava, min: 0.0, max: 20.0)
+  border:
+    shrink-interval: 15 # Time interval for border shrinking in Border mode (min: 5, max: 300)
+    initial-size: 64.0 # Initial border size (min: 16.0, max: 500.0)
+    min-size: 8.0 # Minimum border size after shrinking (min: 4.0)
+  start:
+    player-count: 2 # Minimum players to start the game (min: 1, max: 100)
+    countdown: 30 # Countdown timer before game starts (in seconds, min: 10, max: 120)
 
+# Voting settings
 voting:
-  enable-mode-voting: true # Enable or disable voting for the rising mode (lava, water, void, border)
-  enable-biome-voting: true # Enable or disable voting for the biome (overworld, nether, end)
-  default-mode: void # Default rising mode if voting is disabled (options: lava, water, void, border)
-  default-biome: overworld # Default biome if voting is disabled (options: overworld, nether, end)
+  enabled:
+    mode: true # Enable voting for rising mode (true/false)
+    biome: true # Enable voting for biome (true/false)
+  defaults:
+    mode: "void" # Default rising mode if voting disabled (options: lava, water, void, border)
+    biome: "overworld" # Default biome if voting disabled (options: overworld, nether, end)
+  vote-duration: 30 # Duration of voting period (in seconds, min: 10, max: 120)

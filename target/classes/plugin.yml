@@ -7,7 +7,7 @@ description: Just a towers plugin
 commands:
   towers:
     description: Manage the Towers minigame
-    usage: /<command> <setup|tp|join>
+    usage: /<command> <setup|tp|join|reload>
 permissions:
   towers.setup:
     description: Setup for Towers game
@@ -18,3 +18,6 @@ permissions:
   towers.join:
     description: Joins you to Towers game
     default: true
+  towers.reload:
+    description: Reload the plugin configuration
+    default: op

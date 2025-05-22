@@ -8,8 +8,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Objects;
 
 public class EventListener implements Listener {
     private final GameManager gameManager;
@@ -38,6 +42,7 @@ public class EventListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player)) return;
         Player player = (Player) event.getWhoClicked();
         String title = event.getView().getTitle();
+
         if (title.equals(ChatColor.DARK_PURPLE + "Towers Setup")) {
             event.setCancelled(true);
             ItemStack item = event.getCurrentItem();
@@ -54,7 +59,36 @@ public class EventListener implements Listener {
             event.setCancelled(true);
             ItemStack item = event.getCurrentItem();
             if (item != null && item.getItemMeta() != null && item.getType() != Material.GRAY_STAINED_GLASS_PANE) {
-                gameManager.handleVote(player, item.getItemMeta().getDisplayName());
+                String displayName = item.getItemMeta().getDisplayName();
+                gameManager.handleVote(player, displayName);
+                player.closeInventory();
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        if (gameManager.getGameWorld() != null && player.getWorld().equals(gameManager.getGameWorld())) {
+            if (!gameManager.isGameRunning()) {
+                event.setCancelled(true);
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', gameManager.getPlugin().getConfig().getString("prefix", "&b[Towers] ") + "&cYou cannot drop items during the lobby phase!"));
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        ItemStack item = player.getInventory().getItemInMainHand();
+
+        if (item != null && item.getType() == Material.NETHER_STAR && item.hasItemMeta()) {
+            String displayName = Objects.requireNonNull(item.getItemMeta()).getDisplayName();
+            if (displayName != null && displayName.equals(ChatColor.GOLD + "Vote for Game Mode & Biome")) {
+                event.setCancelled(true);
+                if (gameManager.getGameWorld() != null && player.getWorld().equals(gameManager.getGameWorld()) && !gameManager.isGameRunning()) {
+                    gameManager.getGuiManager().openVotingGui(player);
+                }
             }
         }
     }

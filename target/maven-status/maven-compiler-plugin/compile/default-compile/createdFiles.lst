@@ -1,5 +1,6 @@
 dev\rokyytr\managers\GameManager$4.class
 dev\rokyytr\managers\GameManager$3.class
+dev\rokyytr\managers\GameManager$5.class
 dev\rokyytr\listeners\EventListener.class
 dev\rokyytr\commands\TowersTabCompleter.class
 dev\rokyytr\JustTowers.class

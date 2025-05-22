@@ -30,7 +30,13 @@ public class TowersCommand implements CommandExecutor {
                 player.sendMessage(ChatColor.RED + "No permission!");
                 return true;
             }
-            gameManager.addPlayerToLobby(player);
+            if (gameManager.getGameWorld() == null) {
+                gameManager.createLobbyWorld();
+                player.sendMessage(ChatColor.GREEN + "Towers world created and towers generated!");
+            } else {
+                player.sendMessage(ChatColor.YELLOW + "Towers world already exists. Use /towers tp or /towers join to enter.");
+            }
+            gameManager.getGuiManager().openSetupGui(player);
             return true;
         }
         if (args[0].equalsIgnoreCase("tp")) {

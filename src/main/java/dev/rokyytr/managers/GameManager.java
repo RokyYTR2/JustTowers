@@ -9,6 +9,8 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -74,16 +76,26 @@ public class GameManager {
         this.itemBossBar = Bukkit.createBossBar("Next item in: 10s", BarColor.GREEN, BarStyle.SOLID);
     }
 
+    public JustTowers getPlugin() {
+        return plugin;
+    }
+
     public void addPlayerToLobby(Player player) {
+        if (lobbyPlayers.contains(player)) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("prefix", "&b[Towers] ") + "&cYou are already in the game!"));
+            return;
+        }
         if (gameWorld == null) {
             createLobbyWorld();
         }
         lobbyPlayers.add(player);
+        player.setHealth(20.0);
+        player.setFoodLevel(20);
         if (!availableTowerLocations.isEmpty()) {
             Location spawnLoc = availableTowerLocations.remove(0);
             player.teleport(spawnLoc.clone().add(0.5, 1, 0.5));
         } else {
-            player.sendMessage(ChatColor.RED + "No available towers to spawn in!");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("prefix", "&b[Towers] ") + "&cNo available towers to spawn in!"));
             return;
         }
         guiManager.openVotingGui(player);
@@ -95,13 +107,19 @@ public class GameManager {
 
     public void addPlayer(Player player) {
         if (gameWorld != null && player.getWorld().equals(gameWorld) && !gameRunning) {
+            if (lobbyPlayers.contains(player)) {
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("prefix", "&b[Towers] ") + "&cYou are already in the game!"));
+                return;
+            }
             lobbyPlayers.add(player);
+            player.setHealth(20.0);
+            player.setFoodLevel(20);
             guiManager.openVotingGui(player);
             if (!availableTowerLocations.isEmpty()) {
                 Location spawnLoc = availableTowerLocations.remove(0);
                 player.teleport(spawnLoc.clone().add(0.5, 1, 0.5));
             } else {
-                player.sendMessage(ChatColor.RED + "No available towers to spawn in!");
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("prefix", "&b[Towers] ") + "&cNo available towers to spawn in!"));
                 return;
             }
             if (lobbyPlayers.size() >= playerCountToStart) {
@@ -118,16 +136,17 @@ public class GameManager {
         if (vote.contains("Rising Lava")) selectedMode = "lava";
         else if (vote.contains("Rising Water")) selectedMode = "water";
         else if (vote.contains("Void")) selectedMode = "void";
+        else if (vote.contains("Shrinking Border")) selectedMode = "border";
         else if (vote.contains("Overworld Biome")) selectedBiome = "overworld";
         else if (vote.contains("Nether Biome")) selectedBiome = "nether";
         else if (vote.contains("End Biome")) selectedBiome = "end";
-        player.sendMessage(ChatColor.GREEN + "Voted for " + vote);
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("prefix", "&b[Towers] ") + "&aVoted for " + vote));
         if (lobbyPlayers.size() >= playerCountToStart && !gameRunning) {
             startCountdown();
         }
     }
 
-    private void createLobbyWorld() {
+    public void createLobbyWorld() {
         worldGenerator.createGameWorld();
         availableTowerLocations.addAll(towerLocations);
     }
@@ -171,6 +190,7 @@ public class GameManager {
 
         for (Player p : gameWorld.getPlayers()) {
             itemBossBar.addPlayer(p);
+            p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 30, 0));
         }
 
         lobbyPlayers.clear();
@@ -192,15 +212,19 @@ public class GameManager {
                     int intYLevel = (int) yLevel;
                     for (int x = -32; x <= 32; x++) {
                         for (int z = -32; z <= 32; z++) {
-                            if (selectedMode.equals("lava")) {
-                                gameWorld.getBlockAt(x, intYLevel, z).setType(Material.LAVA);
-                            } else if (selectedMode.equals("water")) {
-                                gameWorld.getBlockAt(x, intYLevel, z).setType(Material.WATER);
-                            } else if (selectedMode.equals("border")) {
-                                double dist = Math.sqrt(x * x + z * z);
-                                if (dist > currentBorderSize[0]) {
-                                    gameWorld.getBlockAt(x, intYLevel, z).setType(Material.BARRIER);
-                                }
+                            switch (selectedMode) {
+                                case "lava":
+                                    gameWorld.getBlockAt(x, intYLevel, z).setType(Material.LAVA);
+                                    break;
+                                case "water":
+                                    gameWorld.getBlockAt(x, intYLevel, z).setType(Material.WATER);
+                                    break;
+                                case "border":
+                                    double dist = Math.sqrt(x * x + z * z);
+                                    if (dist > currentBorderSize[0]) {
+                                        gameWorld.getBlockAt(x, intYLevel, z).setType(Material.BARRIER);
+                                    }
+                                    break;
                             }
                         }
                     }
@@ -228,7 +252,7 @@ public class GameManager {
                     itemBossBar.removeAll();
                     for (Player p : gameWorld.getPlayers()) {
                         if (p.getHealth() > 0 && p.getGameMode() != GameMode.SPECTATOR) {
-                            p.sendMessage(ChatColor.GOLD + "You won!");
+                            p.sendTitle(ChatColor.GOLD + "You Won!", "", 0, 40, 0);
                         }
                         p.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
                     }
@@ -335,5 +359,9 @@ public class GameManager {
 
     public boolean isBiomeVotingEnabled() {
         return enableBiomeVoting;
+    }
+
+    public boolean isGameRunning() {
+        return gameRunning;
     }
 }

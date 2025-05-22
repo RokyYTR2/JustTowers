@@ -1,5 +1,7 @@
 # Configuration file for the JustTowers plugin
 
+prefix: "&b&l[Towers] " # Prefix for all plugin messages, supports RGB with & color codes
+
 towers:
   number: 8 # Number of towers to generate in the world
   radius: 16.0 # Base radius of the tower circle

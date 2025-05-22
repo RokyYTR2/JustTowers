@@ -62,18 +62,11 @@ public class GuiManager {
         assert fillerMeta != null;
         fillerMeta.setDisplayName(ChatColor.RESET + "");
         filler.setItemMeta(fillerMeta);
-        for (int i = 0; i < 36; i++) {
+        for (int i = 0; i < 9; i++) {
             gui.setItem(i, filler);
+            gui.setItem(i + 27, filler);
         }
 
-        ItemStack modeLabel = new ItemStack(Material.NAME_TAG);
-        ItemMeta modeLabelMeta = modeLabel.getItemMeta();
-        assert modeLabelMeta != null;
-        modeLabelMeta.setDisplayName(ChatColor.AQUA + "Mode Voting");
-        modeLabel.setItemMeta(modeLabelMeta);
-        gui.setItem(1, modeLabel);
-
-        int slot = 10;
         if (gameManager.isModeVotingEnabled()) {
             ItemStack lava = new ItemStack(Material.LAVA_BUCKET);
             ItemMeta lavaMeta = lava.getItemMeta();
@@ -81,7 +74,7 @@ public class GuiManager {
             lavaMeta.setDisplayName(ChatColor.RED + "Rising Lava");
             lavaMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Lava rises from below!"));
             lava.setItemMeta(lavaMeta);
-            gui.setItem(slot, lava);
+            gui.setItem(12, lava);
 
             ItemStack water = new ItemStack(Material.WATER_BUCKET);
             ItemMeta waterMeta = water.getItemMeta();
@@ -89,15 +82,15 @@ public class GuiManager {
             waterMeta.setDisplayName(ChatColor.BLUE + "Rising Water");
             waterMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Water rises and damages!"));
             water.setItemMeta(waterMeta);
-            gui.setItem(slot + 1, water);
+            gui.setItem(13, water);
 
             ItemStack voidItem = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
             ItemMeta voidMeta = voidItem.getItemMeta();
             assert voidMeta != null;
             voidMeta.setDisplayName(ChatColor.BLACK + "Void");
-            voidMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Fall into the void!"));
+            voidMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Fall into the void and die!"));
             voidItem.setItemMeta(voidMeta);
-            gui.setItem(slot + 2, voidItem);
+            gui.setItem(14, voidItem);
 
             ItemStack border = new ItemStack(Material.BARRIER);
             ItemMeta borderMeta = border.getItemMeta();
@@ -105,17 +98,8 @@ public class GuiManager {
             borderMeta.setDisplayName(ChatColor.DARK_GRAY + "Shrinking Border");
             borderMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Border closes in over time!"));
             border.setItemMeta(borderMeta);
-            gui.setItem(slot + 3, border);
-
-            slot += 9;
+            gui.setItem(15, border);
         }
-
-        ItemStack biomeLabel = new ItemStack(Material.NAME_TAG);
-        ItemMeta biomeLabelMeta = biomeLabel.getItemMeta();
-        assert biomeLabelMeta != null;
-        biomeLabelMeta.setDisplayName(ChatColor.AQUA + "Biome Voting");
-        biomeLabel.setItemMeta(biomeLabelMeta);
-        gui.setItem(slot - 8, biomeLabel);
 
         if (gameManager.isBiomeVotingEnabled()) {
             ItemStack overworld = new ItemStack(Material.GRASS_BLOCK);
@@ -124,7 +108,7 @@ public class GuiManager {
             overMeta.setDisplayName(ChatColor.GREEN + "Overworld Biome");
             overMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Overworld dimension."));
             overworld.setItemMeta(overMeta);
-            gui.setItem(slot, overworld);
+            gui.setItem(21, overworld);
 
             ItemStack nether = new ItemStack(Material.NETHERRACK);
             ItemMeta netherMeta = nether.getItemMeta();
@@ -132,7 +116,7 @@ public class GuiManager {
             netherMeta.setDisplayName(ChatColor.DARK_RED + "Nether Biome");
             netherMeta.setLore(Collections.singletonList(ChatColor.GRAY + "Nether dimension."));
             nether.setItemMeta(netherMeta);
-            gui.setItem(slot + 1, nether);
+            gui.setItem(22, nether);
 
             ItemStack end = new ItemStack(Material.END_STONE);
             ItemMeta endMeta = end.getItemMeta();
@@ -140,7 +124,7 @@ public class GuiManager {
             endMeta.setDisplayName(ChatColor.DARK_PURPLE + "End Biome");
             endMeta.setLore(Collections.singletonList(ChatColor.GRAY + "End dimension."));
             end.setItemMeta(endMeta);
-            gui.setItem(slot + 2, end);
+            gui.setItem(23, end);
         }
 
         player.openInventory(gui);
@@ -150,6 +134,7 @@ public class GuiManager {
         ItemStack item = gui.getItem(4);
         if (item != null) {
             ItemMeta meta = item.getItemMeta();
+            assert meta != null;
             meta.setDisplayName(ChatColor.YELLOW + "Player Count: " + gameManager.getPlayerCountToStart());
             meta.setLore(Arrays.asList(ChatColor.GRAY + "Current: " + gameManager.getPlayerCountToStart(), ChatColor.GRAY + "Min: 2, Max: 16"));
             item.setItemMeta(meta);

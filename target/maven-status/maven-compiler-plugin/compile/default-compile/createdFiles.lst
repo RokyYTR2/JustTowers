@@ -1,10 +1,11 @@
+dev\rokyytr\managers\GameManager$4.class
+dev\rokyytr\managers\GameManager$3.class
+dev\rokyytr\listeners\EventListener.class
 dev\rokyytr\commands\TowersTabCompleter.class
 dev\rokyytr\JustTowers.class
-dev\rokyytr\managers\GameManager$3.class
 dev\rokyytr\managers\GameManager.class
 dev\rokyytr\generators\WorldGenerator.class
 dev\rokyytr\managers\GameManager$1.class
 dev\rokyytr\commands\TowersCommand.class
 dev\rokyytr\gui\GuiManager.class
-dev\rokyytr\listeners\EventListener.class
 dev\rokyytr\managers\GameManager$2.class

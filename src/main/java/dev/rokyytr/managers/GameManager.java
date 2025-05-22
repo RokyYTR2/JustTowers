@@ -4,6 +4,9 @@ import dev.rokyytr.JustTowers;
 import dev.rokyytr.generators.WorldGenerator;
 import dev.rokyytr.gui.GuiManager;
 import org.bukkit.*;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -21,6 +24,7 @@ public class GameManager {
     private final List<Location> towerLocations = new ArrayList<>();
     private final List<Location> availableTowerLocations = new ArrayList<>();
     private final List<Player> lobbyPlayers = new ArrayList<>();
+    private final BossBar itemBossBar;
     private boolean gameRunning = false;
     private int playerCountToStart;
     private final int numberOfTowers;
@@ -67,14 +71,7 @@ public class GameManager {
         this.playerCountToStart = plugin.getConfig().getInt("gameplay.player-count-to-start", 2);
         this.worldGenerator = new WorldGenerator(this);
         this.guiManager = new GuiManager(this);
-    }
-
-    public boolean isGameRunning() {
-        return gameRunning;
-    }
-
-    public boolean isInLobby(Player player) {
-        return lobbyPlayers.contains(player);
+        this.itemBossBar = Bukkit.createBossBar("Next item in: 10s", BarColor.GREEN, BarStyle.SOLID);
     }
 
     public void addPlayerToLobby(Player player) {
@@ -84,11 +81,13 @@ public class GameManager {
         lobbyPlayers.add(player);
         if (!availableTowerLocations.isEmpty()) {
             Location spawnLoc = availableTowerLocations.remove(0);
-            player.teleport(spawnLoc.clone().add(0.5, 0, 0.5));
+            player.teleport(spawnLoc.clone().add(0.5, 1, 0.5));
         } else {
             player.sendMessage(ChatColor.RED + "No available towers to spawn in!");
             return;
         }
+        guiManager.openVotingGui(player);
+
         if (lobbyPlayers.size() >= playerCountToStart && !gameRunning) {
             startCountdown();
         }
@@ -100,7 +99,7 @@ public class GameManager {
             guiManager.openVotingGui(player);
             if (!availableTowerLocations.isEmpty()) {
                 Location spawnLoc = availableTowerLocations.remove(0);
-                player.teleport(spawnLoc.clone().add(0.5, 0, 0.5));
+                player.teleport(spawnLoc.clone().add(0.5, 1, 0.5));
             } else {
                 player.sendMessage(ChatColor.RED + "No available towers to spawn in!");
                 return;
@@ -160,25 +159,20 @@ public class GameManager {
             int x = loc.getBlockX();
             int y = loc.getBlockY();
             int z = loc.getBlockZ();
-            for (int dy = 0; dy < 2; dy++) {
+
+            for (int dy = 0; dy <= 3; dy++) {
                 for (int dx = -1; dx <= 1; dx++) {
                     for (int dz = -1; dz <= 1; dz++) {
-                        if (dx == 0 && dz == 0 && dy == 0) continue;
                         gameWorld.getBlockAt(x + dx, y + dy, z + dz).setType(Material.AIR);
                     }
                 }
             }
         }
-        List<Location> locations = new ArrayList<>(towerLocations);
-        for (int i = 0; i < lobbyPlayers.size(); i++) {
-            Player player = lobbyPlayers.get(i);
-            if (i < locations.size()) {
-                Location loc = locations.get(i);
-                player.teleport(new Location(gameWorld, loc.getX(), towerBottomY + towerMinHeight, loc.getZ()).add(0.5, 0, 0.5));
-            } else {
-                player.teleport(new Location(gameWorld, locations.get(0).getX(), towerBottomY + towerMinHeight, locations.get(0).getZ()).add(0.5, 0, 0.5));
-            }
+
+        for (Player p : gameWorld.getPlayers()) {
+            itemBossBar.addPlayer(p);
         }
+
         lobbyPlayers.clear();
         runGameTasks();
     }
@@ -194,10 +188,10 @@ public class GameManager {
                     return;
                 }
                 if (yLevel < 104) {
-                    yLevel += risingSpeed;
+                    yLevel += risingSpeed * 0.2;
                     int intYLevel = (int) yLevel;
-                    for (int x = -64; x <= 64; x++) {
-                        for (int z = -64; z <= 64; z++) {
+                    for (int x = -32; x <= 32; x++) {
+                        for (int z = -32; z <= 32; z++) {
                             if (selectedMode.equals("lava")) {
                                 gameWorld.getBlockAt(x, intYLevel, z).setType(Material.LAVA);
                             } else if (selectedMode.equals("water")) {
@@ -231,6 +225,7 @@ public class GameManager {
                 if (alive <= 1) {
                     gameRunning = false;
                     cancel();
+                    itemBossBar.removeAll();
                     for (Player p : gameWorld.getPlayers()) {
                         if (p.getHealth() > 0 && p.getGameMode() != GameMode.SPECTATOR) {
                             p.sendMessage(ChatColor.GOLD + "You won!");
@@ -243,34 +238,47 @@ public class GameManager {
         }.runTaskTimer(plugin, 20L, 20L);
 
         new BukkitRunnable() {
-            int ticks = 0;
+            int timeLeft = itemInterval;
             @Override
             public void run() {
                 if (!gameRunning) {
                     cancel();
                     return;
                 }
-                if (selectedMode.equals("border") && ticks % (borderShrinkInterval * 20) == 0) {
+
+                if (timeLeft <= 0) {
+                    for (Player p : gameWorld.getPlayers()) {
+                        if (p.getHealth() > 0 && p.getGameMode() != GameMode.SPECTATOR) {
+                            p.getInventory().addItem(new ItemStack(getRandomMaterial()));
+                        }
+                    }
+                    timeLeft = itemInterval;
+                }
+
+                itemBossBar.setTitle("Next item in: " + timeLeft + "s");
+                itemBossBar.setProgress((double) timeLeft / itemInterval);
+                timeLeft--;
+            }
+        }.runTaskTimer(plugin, 0L, 20L);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!gameRunning) {
+                    cancel();
+                    return;
+                }
+                if (selectedMode.equals("border")) {
                     currentBorderSize[0] -= 1.0;
                     if (currentBorderSize[0] < 5) currentBorderSize[0] = 5;
                 }
-                ticks++;
-                for (Player p : gameWorld.getPlayers()) {
-                    if (p.getHealth() > 0 && p.getGameMode() != GameMode.SPECTATOR) {
-                        p.getInventory().addItem(new ItemStack(getRandomMaterial()));
-                    }
-                }
             }
-        }.runTaskTimer(plugin, itemInterval * 20L, 1L);
+        }.runTaskTimer(plugin, borderShrinkInterval * 20L, borderShrinkInterval * 20L);
     }
 
     private Material getRandomMaterial() {
-        Material[] materials = {
-                Material.STONE, Material.WOODEN_SWORD, Material.BOW, Material.ARROW,
-                Material.IRON_AXE, Material.GOLDEN_APPLE, Material.TNT, Material.FLINT_AND_STEEL,
-                Material.WATER_BUCKET, Material.LAVA_BUCKET, Material.OAK_PLANKS, Material.GLASS
-        };
-        return materials[random.nextInt(materials.length)];
+        Material[] allMaterials = Material.values();
+        return allMaterials[random.nextInt(allMaterials.length)];
     }
 
     public World getGameWorld() {
@@ -287,14 +295,6 @@ public class GameManager {
 
     public int getPlayerCountToStart() {
         return playerCountToStart;
-    }
-
-    public String getSelectedMode() {
-        return selectedMode;
-    }
-
-    public String getSelectedBiome() {
-        return selectedBiome;
     }
 
     public GuiManager getGuiManager() {

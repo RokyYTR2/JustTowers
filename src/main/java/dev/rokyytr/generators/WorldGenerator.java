@@ -43,19 +43,47 @@ public class WorldGenerator {
             int x = (int) Math.round((radius + gap * i) * Math.cos(angle));
             int z = (int) Math.round((radius + gap * i) * Math.sin(angle));
             int height = minHeight;
+
             for (int y = bottomY; y < bottomY + height; y++) {
                 gameWorld.getBlockAt(x, y, z).setType(towerMaterial);
             }
+
             int boxBaseY = bottomY + height + 5;
+
+            gameWorld.getBlockAt(x, boxBaseY, z).setType(Material.GLASS);
+
             gameWorld.getBlockAt(x + 1, boxBaseY, z).setType(Material.GLASS);
             gameWorld.getBlockAt(x - 1, boxBaseY, z).setType(Material.GLASS);
             gameWorld.getBlockAt(x, boxBaseY, z + 1).setType(Material.GLASS);
             gameWorld.getBlockAt(x, boxBaseY, z - 1).setType(Material.GLASS);
-            gameWorld.getBlockAt(x + 1, boxBaseY + 1, z).setType(Material.GLASS);
-            gameWorld.getBlockAt(x - 1, boxBaseY + 1, z).setType(Material.GLASS);
-            gameWorld.getBlockAt(x, boxBaseY + 1, z + 1).setType(Material.GLASS);
-            gameWorld.getBlockAt(x, boxBaseY + 1, z - 1).setType(Material.GLASS);
-            gameWorld.getBlockAt(x, boxBaseY + 2, z).setType(Material.GLASS);
+
+            gameWorld.getBlockAt(x + 1, boxBaseY, z + 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x + 1, boxBaseY, z - 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x - 1, boxBaseY, z + 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x - 1, boxBaseY, z - 1).setType(Material.GLASS);
+
+            for (int wallY = boxBaseY + 1; wallY <= boxBaseY + 2; wallY++) {
+                gameWorld.getBlockAt(x + 1, wallY, z).setType(Material.GLASS);
+                gameWorld.getBlockAt(x - 1, wallY, z).setType(Material.GLASS);
+                gameWorld.getBlockAt(x, wallY, z + 1).setType(Material.GLASS);
+                gameWorld.getBlockAt(x, wallY, z - 1).setType(Material.GLASS);
+
+                gameWorld.getBlockAt(x + 1, wallY, z + 1).setType(Material.GLASS);
+                gameWorld.getBlockAt(x + 1, wallY, z - 1).setType(Material.GLASS);
+                gameWorld.getBlockAt(x - 1, wallY, z + 1).setType(Material.GLASS);
+                gameWorld.getBlockAt(x - 1, wallY, z - 1).setType(Material.GLASS);
+            }
+
+            gameWorld.getBlockAt(x, boxBaseY + 3, z).setType(Material.GLASS);
+            gameWorld.getBlockAt(x + 1, boxBaseY + 3, z).setType(Material.GLASS);
+            gameWorld.getBlockAt(x - 1, boxBaseY + 3, z).setType(Material.GLASS);
+            gameWorld.getBlockAt(x, boxBaseY + 3, z + 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x, boxBaseY + 3, z - 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x + 1, boxBaseY + 3, z + 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x + 1, boxBaseY + 3, z - 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x - 1, boxBaseY + 3, z + 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x - 1, boxBaseY + 3, z - 1).setType(Material.GLASS);
+
             towerLocations.add(new Location(gameWorld, x, boxBaseY, z));
         }
         gameManager.getTowerLocations().clear();

@@ -84,7 +84,6 @@ public class TowersCommand implements CommandExecutor {
             return true;
         }
 
-        // Teleport to the first tower
         player.teleport(gameManager.getTowerLocations().get(0).clone().add(0.5, 1, 0.5));
         player.sendMessage(ChatColor.GREEN + "Teleported to a Towers game tower!");
         return true;

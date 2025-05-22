@@ -64,7 +64,7 @@ public class WorldGenerator {
             int boxBaseY = bottomY + height;
             createSpawnBox(gameWorld, x, boxBaseY, z);
 
-            towerLocations.add(new Location(gameWorld, x, boxBaseY, z));
+            towerLocations.add(new Location(gameWorld, x, boxBaseY + 1, z));
         }
 
         gameManager.getTowerLocations().clear();
@@ -78,12 +78,11 @@ public class WorldGenerator {
             }
         }
 
-        for (int wallY = y + 1; wallY <= y + 3; wallY++) {
+        for (int wallY = y + 1; wallY <= y + 4; wallY++) {
             for (int dx = -1; dx <= 1; dx++) {
                 world.getBlockAt(x + dx, wallY, z - 1).setType(Material.GLASS);
                 world.getBlockAt(x + dx, wallY, z + 1).setType(Material.GLASS);
             }
-
             world.getBlockAt(x - 1, wallY, z).setType(Material.GLASS);
             world.getBlockAt(x + 1, wallY, z).setType(Material.GLASS);
         }
@@ -91,7 +90,7 @@ public class WorldGenerator {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 if (dx != 0 || dz != 0) {
-                    world.getBlockAt(x + dx, y + 4, z + dz).setType(Material.GLASS);
+                    world.getBlockAt(x + dx, y + 5, z + dz).setType(Material.GLASS);
                 }
             }
         }

@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -32,7 +33,7 @@ public class EventListener implements Listener {
         if (gameManager.getGameWorld() != null && event.getPlayer().getWorld().equals(gameManager.getGameWorld())) {
             if (!gameManager.isGameRunning()) {
                 event.setCancelled(true);
-                event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', gameManager.getPlugin().getConfig().getString("prefix", "&b[Towers] ") + "&cYou cannot break blocks during the lobby phase!"));
+                event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', gameManager.getPlugin().getConfig().getString("general.prefix", "&b[Towers] ") + "&cYou cannot break blocks during the lobby phase!"));
             }
         }
     }
@@ -46,7 +47,7 @@ public class EventListener implements Listener {
         if (title.equals(ChatColor.DARK_PURPLE + "Towers Setup")) {
             event.setCancelled(true);
             ItemStack item = event.getCurrentItem();
-            if (item != null) {
+            if (item != null && item.getType() != Material.AIR) {
                 if (item.getType() == Material.GREEN_STAINED_GLASS_PANE) {
                     gameManager.updatePlayerCount(true);
                     gameManager.getGuiManager().updateSetupGui(player, event.getInventory());
@@ -58,10 +59,12 @@ public class EventListener implements Listener {
         } else if (title.equals(ChatColor.DARK_PURPLE + "Towers Voting")) {
             event.setCancelled(true);
             ItemStack item = event.getCurrentItem();
-            if (item != null && item.getItemMeta() != null && item.getType() != Material.GRAY_STAINED_GLASS_PANE) {
-                String displayName = item.getItemMeta().getDisplayName();
-                gameManager.handleVote(player, displayName);
-                player.closeInventory();
+            if (item != null && item.getType() != Material.AIR && item.hasItemMeta() && item.getType() != Material.GRAY_STAINED_GLASS_PANE) {
+                String displayName = Objects.requireNonNull(item.getItemMeta()).getDisplayName();
+                if (displayName != null && !displayName.isEmpty()) {
+                    gameManager.handleVote(player, displayName);
+                    player.closeInventory();
+                }
             }
         }
     }
@@ -72,7 +75,7 @@ public class EventListener implements Listener {
         if (gameManager.getGameWorld() != null && player.getWorld().equals(gameManager.getGameWorld())) {
             if (!gameManager.isGameRunning()) {
                 event.setCancelled(true);
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', gameManager.getPlugin().getConfig().getString("prefix", "&b[Towers] ") + "&cYou cannot drop items during the lobby phase!"));
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', gameManager.getPlugin().getConfig().getString("general.prefix", "&b[Towers] ") + "&cYou cannot drop items during the lobby phase!"));
             }
         }
     }
@@ -82,12 +85,15 @@ public class EventListener implements Listener {
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
 
-        if (item != null && item.getType() == Material.NETHER_STAR && item.hasItemMeta()) {
-            String displayName = Objects.requireNonNull(item.getItemMeta()).getDisplayName();
-            if (displayName != null && displayName.equals(ChatColor.GOLD + "Vote for Game Mode & Biome")) {
-                event.setCancelled(true);
-                if (gameManager.getGameWorld() != null && player.getWorld().equals(gameManager.getGameWorld()) && !gameManager.isGameRunning()) {
-                    gameManager.getGuiManager().openVotingGui(player);
+        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            if (item != null && item.getType() == Material.NETHER_STAR && item.hasItemMeta()) {
+                String displayName = Objects.requireNonNull(item.getItemMeta()).getDisplayName();
+                if (displayName != null && (displayName.equals(ChatColor.GOLD + "Vote for Game Mode & Biome") ||
+                        displayName.equals(ChatColor.GOLD + "Vote for Game Settings"))) {
+                    event.setCancelled(true);
+                    if (gameManager.getGameWorld() != null && player.getWorld().equals(gameManager.getGameWorld()) && !gameManager.isGameRunning()) {
+                        gameManager.getGuiManager().openVotingGui(player);
+                    }
                 }
             }
         }

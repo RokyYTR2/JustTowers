@@ -24,6 +24,7 @@ public class WorldGenerator {
         gameWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false);
         gameWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         gameManager.setGameWorld(gameWorld);
+        generateTowers();
     }
 
     public void generateTowers() {
@@ -31,17 +32,31 @@ public class WorldGenerator {
         World gameWorld = gameManager.getGameWorld();
         int numberOfTowers = gameManager.getNumberOfTowers();
         int bottomY = gameManager.getTowerBottomY();
-        int height = gameManager.getTowerMinHeight();
+        int minHeight = gameManager.getTowerMinHeight();
+        int maxHeight = gameManager.getTowerMaxHeight();
         double radius = gameManager.getTowerRadius();
+        double gap = gameManager.getTowerGap();
         Material towerMaterial = gameManager.getTowerMaterial();
+
         for (int i = 0; i < numberOfTowers; i++) {
             double angle = 2 * Math.PI * i / numberOfTowers;
-            int x = (int) Math.round(radius * Math.cos(angle));
-            int z = (int) Math.round(radius * Math.sin(angle));
+            int x = (int) Math.round((radius + gap * i) * Math.cos(angle));
+            int z = (int) Math.round((radius + gap * i) * Math.sin(angle));
+            int height = minHeight;
             for (int y = bottomY; y < bottomY + height; y++) {
                 gameWorld.getBlockAt(x, y, z).setType(towerMaterial);
             }
-            towerLocations.add(new Location(gameWorld, x, bottomY + height, z));
+            int boxBaseY = bottomY + height + 5;
+            gameWorld.getBlockAt(x + 1, boxBaseY, z).setType(Material.GLASS);
+            gameWorld.getBlockAt(x - 1, boxBaseY, z).setType(Material.GLASS);
+            gameWorld.getBlockAt(x, boxBaseY, z + 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x, boxBaseY, z - 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x + 1, boxBaseY + 1, z).setType(Material.GLASS);
+            gameWorld.getBlockAt(x - 1, boxBaseY + 1, z).setType(Material.GLASS);
+            gameWorld.getBlockAt(x, boxBaseY + 1, z + 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x, boxBaseY + 1, z - 1).setType(Material.GLASS);
+            gameWorld.getBlockAt(x, boxBaseY + 2, z).setType(Material.GLASS);
+            towerLocations.add(new Location(gameWorld, x, boxBaseY, z));
         }
         gameManager.getTowerLocations().clear();
         gameManager.getTowerLocations().addAll(towerLocations);

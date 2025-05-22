@@ -4,7 +4,7 @@
 - Just a towers plugin like pillars of fortune
 
 📦 **Installation:**
-1. Go to Coming Soon
+1. Go to [SpigotMC](https://www.spigotmc.org/resources/justtowers.125289)
 2. Download the **.jar** file.
 3. Place it in your server's **plugins** folder.
 4. Configure settings in **config.yml**.
@@ -17,5 +17,5 @@
 - **Voting System:** Enable voting for game modes and biomes (overworld, nether, end).
 
 💻 **Open Source:**
-This plugin is open source.
-Feel free to edit the code, but **please do not claim it as your own.**
+- This plugin is open source.
+- Feel free to edit the code, but **please do not claim it as your own.**

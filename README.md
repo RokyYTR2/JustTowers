@@ -12,7 +12,7 @@
 6. Use **/towers join** to start playing!
 
 🔑 **Key Features:**
-- **Dynamic Gameplay:** Choose from rising lava, water or a normal void, or a shrinking border mode.
+- **Dynamic Gameplay:** Choose from rising lava, water, void, or a shrinking border mode.
 - **Configurable Options:** Adjust rising speed, water damage, border shrink interval, and more in config.yml.
 - **Voting System:** Enable voting for game modes and biomes (overworld, nether, end).
 

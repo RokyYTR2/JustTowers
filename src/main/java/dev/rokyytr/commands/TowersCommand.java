@@ -24,7 +24,7 @@ public class TowersCommand implements CommandExecutor {
         Player player = (Player) sender;
 
         if (args.length == 0) {
-            player.sendMessage(ChatColor.RED + "Usage: /towers <setup|tp|join|reload>");
+            player.sendMessage(ChatColor.RED + "Usage: /towers <setup|tp|join|leave|reload>");
             return true;
         }
 
@@ -37,10 +37,12 @@ public class TowersCommand implements CommandExecutor {
                 return handleTeleport(player);
             case "join":
                 return handleJoin(player);
+            case "leave":
+                return handleLeave(player);
             case "reload":
                 return handleReload(player);
             default:
-                player.sendMessage(ChatColor.RED + "Unknown subcommand! Use /towers <setup|tp|join|reload>");
+                player.sendMessage(ChatColor.RED + "Unknown subcommand! Use /towers <setup|tp|join|leave|reload>");
                 return true;
         }
     }
@@ -96,6 +98,16 @@ public class TowersCommand implements CommandExecutor {
         }
 
         gameManager.addPlayerToLobby(player);
+        return true;
+    }
+
+    private boolean handleLeave(Player player) {
+        if (!gameManager.getLobbyPlayers().contains(player)) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', gameManager.getPlugin().getConfig().getString("general.prefix", "&b[Towers] ") + "&cYou are not in the game!"));
+            return true;
+        }
+
+        gameManager.removePlayerFromGame(player);
         return true;
     }
 

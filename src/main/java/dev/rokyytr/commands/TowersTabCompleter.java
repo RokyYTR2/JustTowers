@@ -15,7 +15,7 @@ public class TowersTabCompleter implements TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            List<String> subcommands = Arrays.asList("setup", "tp", "join", "reload");
+            List<String> subcommands = Arrays.asList("setup", "tp", "join", "leave", "reload");
             String input = args[0].toLowerCase();
 
             for (String subcommand : subcommands) {

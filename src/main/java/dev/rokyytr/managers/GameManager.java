@@ -89,7 +89,7 @@ public class GameManager {
         }
 
         this.itemInterval = plugin.getConfig().getInt("gameplay.item.interval", 10);
-        this.risingSpeed = plugin.getConfig().getDouble("gameplay.rising.speed", 1.0);
+        this.risingSpeed = plugin.getConfig().getDouble("gameplay.rising.speed", 0.05);
         this.risingDamage = plugin.getConfig().getDouble("gameplay.rising.damage", 2.0);
         this.enableModeVoting = plugin.getConfig().getBoolean("voting.enabled.mode", true);
         this.enableBiomeVoting = plugin.getConfig().getBoolean("voting.enabled.biome", true);
@@ -164,6 +164,45 @@ public class GameManager {
         }
     }
 
+    public void removePlayerFromGame(Player player) {
+        if (lobbyPlayers.contains(player)) {
+            lobbyPlayers.remove(player);
+
+            if (!gameRunning && !towerLocations.isEmpty()) {
+                availableTowerLocations.clear();
+                availableTowerLocations.addAll(towerLocations);
+                for (Player p : lobbyPlayers) {
+                    Location playerLoc = p.getLocation();
+                    availableTowerLocations.removeIf(loc ->
+                            loc.distance(playerLoc) < 2.0
+                    );
+                }
+            }
+
+            itemBossBar.removePlayer(player);
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("general.prefix", "&b[Towers] ") + "&aYou left the game!"));
+
+            for (Player p : lobbyPlayers) {
+                p.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("general.prefix", "&b[Towers] ") + "&e" + player.getName() + " left the game! (" + lobbyPlayers.size() + "/" + playerCountToStart + ")"));
+            }
+        }
+
+        player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+        player.setGameMode(GameMode.SURVIVAL);
+        player.setHealth(20.0);
+        player.setFoodLevel(20);
+        player.getInventory().clear();
+
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            player.removePotionEffect(effect.getType());
+        }
+
+        if (gameRunning && lobbyPlayers.size() <= 1) {
+            Player winner = lobbyPlayers.isEmpty() ? null : lobbyPlayers.get(0);
+            endGame(winner);
+        }
+    }
+
     public void addPlayer(Player player) {
         if (gameWorld != null && player.getWorld().equals(gameWorld) && !gameRunning) {
             addPlayerToLobby(player);
@@ -179,6 +218,8 @@ public class GameManager {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("general.prefix", "&b[Towers] ") + "&cYou have already voted!"));
             return;
         }
+
+        votedPlayers.add(player);
 
         if (vote.contains("Rising Lava")) {
             modeVotes.put("lava", modeVotes.get("lava") + 1);
@@ -293,7 +334,7 @@ public class GameManager {
         for (Player p : new ArrayList<>(lobbyPlayers)) {
             if (p.isOnline() && p.getWorld().equals(gameWorld)) {
                 itemBossBar.addPlayer(p);
-                p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 60, 0));
+                p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 30, 0));
                 p.getInventory().clear();
             } else {
                 lobbyPlayers.remove(p);
@@ -306,6 +347,7 @@ public class GameManager {
     private void runGameTasks() {
         new BukkitRunnable() {
             double yLevel = towerBottomY;
+            int tickCounter = 0;
             @Override
             public void run() {
                 if (!gameRunning) {
@@ -325,24 +367,29 @@ public class GameManager {
                     return;
                 }
 
-                if (!selectedMode.equals("border") && yLevel < towerBottomY + towerMinHeight + 20) {
-                    yLevel += risingSpeed / 20.0;
-                    int intYLevel = (int) yLevel;
+                tickCounter++;
+                if (tickCounter >= 20) {
+                    tickCounter = 0;
 
-                    int range = (int) (initialBorderSize + 10);
-                    for (int x = -range; x <= range; x++) {
-                        for (int z = -range; z <= range; z++) {
-                            switch (selectedMode) {
-                                case "lava":
-                                    if (gameWorld.getBlockAt(x, intYLevel, z).getType() == Material.AIR) {
-                                        gameWorld.getBlockAt(x, intYLevel, z).setType(Material.LAVA);
-                                    }
-                                    break;
-                                case "water":
-                                    if (gameWorld.getBlockAt(x, intYLevel, z).getType() == Material.AIR) {
-                                        gameWorld.getBlockAt(x, intYLevel, z).setType(Material.WATER);
-                                    }
-                                    break;
+                    if (!selectedMode.equals("border") && yLevel < towerBottomY + towerMinHeight + 20) {
+                        yLevel += risingSpeed;
+                        int intYLevel = (int) yLevel;
+
+                        int range = (int) (initialBorderSize + 10);
+                        for (int x = -range; x <= range; x++) {
+                            for (int z = -range; z <= range; z++) {
+                                switch (selectedMode) {
+                                    case "lava":
+                                        if (gameWorld.getBlockAt(x, intYLevel, z).getType() == Material.AIR) {
+                                            gameWorld.getBlockAt(x, intYLevel, z).setType(Material.LAVA);
+                                        }
+                                        break;
+                                    case "water":
+                                        if (gameWorld.getBlockAt(x, intYLevel, z).getType() == Material.AIR) {
+                                            gameWorld.getBlockAt(x, intYLevel, z).setType(Material.WATER);
+                                        }
+                                        break;
+                                }
                             }
                         }
                     }
@@ -352,7 +399,7 @@ public class GameManager {
                     Location loc = p.getLocation();
 
                     if (selectedMode.equals("water") && loc.getY() <= yLevel) {
-                        p.damage(risingDamage);
+                        p.damage(risingDamage / 20.0);
                     }
 
                     if ((selectedMode.equals("void") && loc.getY() < yLevel - 2) ||
@@ -427,6 +474,7 @@ public class GameManager {
     }
 
     private void eliminatePlayer(Player player) {
+        lobbyPlayers.remove(player);
         player.setGameMode(GameMode.SPECTATOR);
         player.sendTitle(ChatColor.RED + "You Died!", ChatColor.GRAY + "Better luck next time!", 0, 60, 20);
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_DEATH, 1.0f, 1.0f);
@@ -511,11 +559,9 @@ public class GameManager {
 
     public boolean isGameRunning() { return gameRunning; }
 
-    public List<Material> getTowerMaterial() {
-        return towerMaterials;
-    }
-
     public List<Material> getTowerMaterials() {
         return towerMaterials;
     }
+
+    public List<Player> getLobbyPlayers() { return lobbyPlayers; }
 }

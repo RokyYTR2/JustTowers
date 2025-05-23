@@ -88,8 +88,7 @@ public class EventListener implements Listener {
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (item != null && item.getType() == Material.NETHER_STAR && item.hasItemMeta()) {
                 String displayName = Objects.requireNonNull(item.getItemMeta()).getDisplayName();
-                if (displayName != null && (displayName.equals(ChatColor.GOLD + "Vote for Game Mode & Biome") ||
-                        displayName.equals(ChatColor.GOLD + "Vote for Game Settings"))) {
+                if (displayName != null && displayName.contains("Vote for Game")) {
                     event.setCancelled(true);
                     if (gameManager.getGameWorld() != null && player.getWorld().equals(gameManager.getGameWorld()) && !gameManager.isGameRunning()) {
                         gameManager.getGuiManager().openVotingGui(player);

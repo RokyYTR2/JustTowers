@@ -1,6 +1,6 @@
 ![image](https://github.com/user-attachments/assets/2681911c-1a83-451e-afa3-9188db11cfd5)
 
-⚠️ **Note:** This plugin is currently in **alpha** and may contain bugs. If you encounter any issues, feel free to DM me on Discord: **meyba._.**
+⚠️ **Note:** This plugin is currently in **alpha** and may contain bugs. If you encounter any issues, feel free to report any issues on our discord server: **https://discord.gg/mEHTNZRHDr**
 
 🏛️ **JustTowers:**
 - Just a towers plugin like pillars of fortune
